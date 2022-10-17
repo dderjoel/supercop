@@ -450,7 +450,7 @@ cat OPERATIONS |
 
                   rm -rf "$work/compile"
                   mkdir -p "$work/compile"
-                  cp -LpR "$implementationdir"/* "$work/compile"
+                  cp -La "$implementationdir"/* "$work/compile"
 
                   cfiles=$(ls "$work/compile" | grep '\.c$' || :)
                   sfiles=$(ls "$work/compile" | grep '\.[sS]$' || :)
