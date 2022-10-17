@@ -39,7 +39,7 @@ static void printnum(long long x)
 static void fail(const char *why)
 {
   fprintf(stderr,"measure: fatal: %s\n",why);
-  exit(111);
+  exit(109);
 }
 
 unsigned char *alignedcalloc(unsigned long long len)
