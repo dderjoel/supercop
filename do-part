@@ -453,7 +453,6 @@ cat OPERATIONS |
                   cp -La "$implementationdir"/* "$work/compile"
 
                   cfiles=$(ls "$work/compile" | grep '\.c$' || :)
-                  sfiles=$(ls "$work/compile" | grep '\.[sS]$' || :)
                   ccfiles=$(ls "$work/compile" | grep '\.cc$' || :)
                   cppfiles=$(ls "$work/compile" | grep '\.cpp$' || :)
 
@@ -505,292 +504,305 @@ cat OPERATIONS |
 
                   (
                     cd "$work/compile"
+                    max=1
+                    test -x "./do" && max=3
+                    # for now check best mul|sq, check second best and third best
 
-                    (
-                      echo "#ifndef ${o}_H"
-                      echo "#define ${o}_H"
-                      echo ""
-                      echo "#include \"${op}.h\""
-                      echo ""
-                      egrep "${o}"'$|'"${o}"'\(|'"${o}"'_' <MACROS |
-                        sed "s/$o/$op/" | while read mop; do
-                        echo "#define ${mop} ${mop}" | sed "s/$op/$o/"
-                      done
-                      echo "#define ${o}_PRIMITIVE \"${p}\""
-                      echo "#define ${o}_IMPLEMENTATION ${op}_IMPLEMENTATION"
-                      echo "#define ${o}_VERSION ${op}_VERSION"
-                      echo ""
-                      echo "#endif"
-                    ) >"$o.h"
-                    for opp in "$op" "${op}_publicinputs"; do
+                    for place_asm in $(seq 1 $max); do
+                      test -x "./do" && "./do" "${place_asm}"
+
+                      sfiles=$(ls "$work/compile" | grep '\.[sS]$' || :)
+
                       (
-                        echo "#ifndef ${opp}_H"
-                        echo "#define ${opp}_H"
+                        echo "#ifndef ${o}_H"
+                        echo "#define ${o}_H"
                         echo ""
-                        sed 's/[         ]CRYPTO_/ '"${opi}"'_/g' <api.h
-                        echo ' '
-                        echo '#ifdef __cplusplus'
-                        echo 'extern "C" {'
-                        echo '#endif'
-                        egrep "${o}"'$|'"${o}"'\(|'"${o}"'_' <PROTOTYPES.c |
-                          sed "s/$o/$opi/"
-                        echo '#ifdef __cplusplus'
-                        echo '}'
-                        echo '#endif'
+                        echo "#include \"${op}.h\""
                         echo ""
                         egrep "${o}"'$|'"${o}"'\(|'"${o}"'_' <MACROS |
-                          sed "s/$o/$opi/" | while read mopi; do
-                          echo "#define ${mopi} ${mopi}" | sed "s/$opi/$opp/"
+                          sed "s/$o/$op/" | while read mop; do
+                          echo "#define ${mop} ${mop}" | sed "s/$op/$o/"
                         done
-                        echo "#define ${opp}_IMPLEMENTATION \"${implementationdir}\""
-                        echo "#ifndef ${opi}_VERSION"
-                        echo "#define ${opi}_VERSION \"-\""
-                        echo "#endif"
-                        echo "#define ${opp}_VERSION ${opi}_VERSION"
+                        echo "#define ${o}_PRIMITIVE \"${p}\""
+                        echo "#define ${o}_IMPLEMENTATION ${op}_IMPLEMENTATION"
+                        echo "#define ${o}_VERSION ${op}_VERSION"
                         echo ""
                         echo "#endif"
-                      ) >"$opp.h"
-                    done
+                      ) >"$o.h"
+                      for opp in "$op" "${op}_publicinputs"; do
+                        (
+                          echo "#ifndef ${opp}_H"
+                          echo "#define ${opp}_H"
+                          echo ""
+                          sed 's/[         ]CRYPTO_/ '"${opi}"'_/g' <api.h
+                          echo ' '
+                          echo '#ifdef __cplusplus'
+                          echo 'extern "C" {'
+                          echo '#endif'
+                          egrep "${o}"'$|'"${o}"'\(|'"${o}"'_' <PROTOTYPES.c |
+                            sed "s/$o/$opi/"
+                          echo '#ifdef __cplusplus'
+                          echo '}'
+                          echo '#endif'
+                          echo ""
+                          egrep "${o}"'$|'"${o}"'\(|'"${o}"'_' <MACROS |
+                            sed "s/$o/$opi/" | while read mopi; do
+                            echo "#define ${mopi} ${mopi}" | sed "s/$opi/$opp/"
+                          done
+                          echo "#define ${opp}_IMPLEMENTATION \"${implementationdir}\""
+                          echo "#ifndef ${opi}_VERSION"
+                          echo "#define ${opi}_VERSION \"-\""
+                          echo "#endif"
+                          echo "#define ${opp}_VERSION ${opi}_VERSION"
+                          echo ""
+                          echo "#endif"
+                        ) >"$opp.h"
+                      done
 
-                    if [ "$rust" ]; then
-                      mkdir -p src/bin
-                      supercop-bin-rs "$o" "$op" "$opi" try-anything try-small $rstrylibs >src/bin/try-small.rs
-                      supercop-bin-rs "$o" "$op" "$opi" try-anything try $rstrylibs >src/bin/try.rs
-                      supercop-bin-rs "$o" "$op" "$opi" measure-anything measure $rsmeasurelibs >src/bin/measure.rs
-                      supercop-cargo-extra >>Cargo.toml
-                      if [ "$wanttimecop" ]; then
-                        supercop-bin-rs "$o" "$op" "$opi" try-anything try-timecop $rstrylibs >src/bin/try-timecop.rs
-                        timecop-cargo-extra >>Cargo.toml
-                      fi
-                    fi
-
-                    ok${language}-$abi |
-                      while read compilerbin compileropts; do
-                        compiler="$compilerbin $compileropts"
-                        echo "=== $(date) === $abi $implementationdir $security $compiler"
-                        compilerword=$(echo "$compiler" | tr ' ' '_')
-                        ok=1
-                        madeo=0
-                        for f in $cfiles $sfiles $ccfiles $cppfiles; do
-                          madeo=1
-                          if [ "$ok" = 1 ]; then
-                            $compiler -DSUPERCOP \
-                              -D'CRYPTO_NAMESPACETOP='"$opi" \
-                              -D'_CRYPTO_NAMESPACETOP=_'"$opi" \
-                              -D'CRYPTO_NAMESPACE(name)='"$opi"'_##name' \
-                              -D'_CRYPTO_NAMESPACE(name)=_'"$opi"'_##name' \
-                              $includes \
-                              -c "$f" >../errors 2>&1 || ok=0
-                            (
-                              if [ $(wc -l <../errors) -lt 25 ]; then
-                                cat ../errors
-                              else
-                                head ../errors
-                                echo ...
-                                tail ../errors
-                              fi
-                            ) |
-                              while read err; do
-                                echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler $implementationdir $compilerword $f $err" >&5
-                              done
-                          fi
-                        done
-
-                        [ "$ok" = 1 ] || continue
-                        if [ "$madeo" = 1 ]; then
-                          okar-$abi cr "lib$op.a" *.o || continue
-                          ranlib "lib$op.a" || :
-                        fi
-
-                        if [ "$rust" ]; then
-                          supercop-build-rs "$op" "$lib/$abi" "$lib/nontimecop/$abi" >build.rs
-                          if killafter 300 \
-                            env \
-                            CC="$compilerbin" \
-                            CFLAGS="$compileropts $includes -DSUPERCOP -DCOMPILER=\"$compilerword\"" \
-                            RUSTFLAGS='-C target_cpu=native' \
-                            cargo build -q --release --bin try-small --bin try --bin measure >../errors 2>&1; then
-                            cp target/release/try-small try-small || ok=0
-                            cp target/release/try try || ok=0
-                            cp target/release/measure measure || ok=0
-                            strip try-small try measure || :
-                          else
-                            ok=0
-                          fi
-                          cat ../errors |
-                            while read err; do
-                              echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler $implementationdir $compilerword try.$language $err" >&5
-                            done
-                          cargo clean -q || :
-                        fi
-                        [ "$ok" = 1 ] || continue
-
-                        if [ ! "$rust" ]; then
-                          killafter 300 \
-                            $compiler -DSUPERCOP \
-                            $includes \
-                            -o try-small try-small.$language try-anything.$language \
-                            "lib$op.a" $trylibs >../errors 2>&1 || ok=0
-                          cat ../errors |
-                            while read err; do
-                              echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler $implementationdir $compilerword try.$language $err" >&5
-                            done
-                        fi
-                        [ "$ok" = 1 ] || continue
-
-                        if sh -c "killafter 3600 ./try-small $version $abi $implementationdir $compilerword"' || exit $?' >../outputs 2>../errors; then
-                          checksumsmall=$(awk '{print $1}' <../outputs)
-                          cycles=$(awk '{print $2}' <../outputs)
-                          checksumcycles=$(awk '{print $3}' <../outputs)
-                          cyclespersecond=$(awk '{print $4}' <../outputs)
-                          impl=$(awk '{print $5}' <../outputs)
-                        else
-                          echo "$version $shorthostname $abi $startdate $o $p/$security tryfails $implementationdir $compilerword error $?" >&5
-                          cat ../outputs ../errors |
-                            while read err; do
-                              echo "$version $shorthostname $abi $startdate $o $p/$security tryfails $implementationdir $compilerword $err" >&5
-                            done
-                          continue
-                        fi
-
-                        [ x"$expectedchecksumsmall" != x ] &&
-                          [ x"$expectedchecksumsmall" != "x$checksumsmall" ] &&
-                          echo "$version $shorthostname $abi $startdate $o $p/$security try $checksumsmall fails $cycles $checksumcycles $cyclespersecond $impl $compilerword" >&5 &&
-                          continue
-
-                        if [ ! "$rust" ]; then
-                          killafter 300 \
-                            $compiler -DSUPERCOP \
-                            $includes \
-                            -o try try.$language try-anything.$language \
-                            "lib$op.a" $trylibs >../errors 2>&1 || ok=0
-                          cat ../errors |
-                            while read err; do
-                              echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler $implementationdir $compilerword try.$language $err" >&5
-                            done
-                        fi
-                        [ "$ok" = 1 ] || continue
-
-                        if sh -c "killafter 3600 ./try $version $abi $implementationdir $compilerword"' || exit $?' >../outputs 2>../errors; then
-                          checksumbig=$(awk '{print $1}' <../outputs)
-                          cycles=$(awk '{print $2}' <../outputs)
-                          checksumcycles=$(awk '{print $3}' <../outputs)
-                          cyclespersecond=$(awk '{print $4}' <../outputs)
-                          impl=$(awk '{print $5}' <../outputs)
-                        else
-                          echo "$version $shorthostname $abi $startdate $o $p/$security tryfails $implementationdir $compilerword error $?" >&5
-                          cat ../outputs ../errors |
-                            while read err; do
-                              echo "$version $shorthostname $abi $startdate $o $p/$security tryfails $implementationdir $compilerword $err" >&5
-                            done
-                          continue
-                        fi
-
-                        [ x"$expectedchecksumbig" != x ] &&
-                          [ x"$expectedchecksumbig" != "x$checksumbig" ] &&
-                          echo "$version $shorthostname $abi $startdate $o $p/$security try $checksumbig fails $cycles $checksumcycles $cyclespersecond $impl $compilerword" >&5 &&
-                          continue
-
-                        checksumok=ok
-                        [ "x$expectedchecksumsmall" = "x" ] && checksumok=unknown
-                        [ "x$expectedchecksumbig" = "x" ] && checksumok=unknown
-                        echo "$version $shorthostname $abi $startdate $o $p/$security try $checksumsmall/$checksumbig $checksumok $cycles $checksumcycles $cyclespersecond $impl $compilerword" >&5
-
-                        compiledinfo "$version" "$shorthostname" "$abi" "$startdate" "$o" "$p/$security" "$implementationdir" "$compilerword" "$opi" "$language"
-
+                      if [ "$rust" ]; then
+                        mkdir -p src/bin
+                        supercop-bin-rs "$o" "$op" "$opi" try-anything try-small $rstrylibs >src/bin/try-small.rs
+                        supercop-bin-rs "$o" "$op" "$opi" try-anything try $rstrylibs >src/bin/try.rs
+                        supercop-bin-rs "$o" "$op" "$opi" measure-anything measure $rsmeasurelibs >src/bin/measure.rs
+                        supercop-cargo-extra >>Cargo.toml
                         if [ "$wanttimecop" ]; then
+                          supercop-bin-rs "$o" "$op" "$opi" try-anything try-timecop $rstrylibs >src/bin/try-timecop.rs
+                          timecop-cargo-extra >>Cargo.toml
+                        fi
+                      fi
+
+                      ok${language}-$abi |
+                        while read compilerbin compileropts; do
+                          compiler="$compilerbin $compileropts"
+                          echo "=== $(date) === $abi $implementationdir $security $compiler"
+                          compilerword=$(echo "$compiler" | tr ' ' '_')
                           ok=1
+                          madeo=0
+
+                          for f in $cfiles $sfiles $ccfiles $cppfiles; do
+                            madeo=1
+                            if [ "$ok" = 1 ]; then
+                              # echo " $compiler -DSUPERCOP  -D'CRYPTO_NAMESPACETOP='"$opi"  -D'_CRYPTO_NAMESPACETOP=_'"$opi"  -D'CRYPTO_NAMESPACE(name)='"$opi"'_##name'  -D'_CRYPTO_NAMESPACE(name)=_'"$opi"'_##name'  $includes  -c "$f" >../errors 2>&1 || ok=0"
+                              $compiler -DSUPERCOP \
+                                -D'CRYPTO_NAMESPACETOP='"$opi" \
+                                -D'_CRYPTO_NAMESPACETOP=_'"$opi" \
+                                -D'CRYPTO_NAMESPACE(name)='"$opi"'_##name' \
+                                -D'_CRYPTO_NAMESPACE(name)=_'"$opi"'_##name' \
+                                $includes \
+                                -c "$f" >../errors 2>&1 || ok=0
+                              (
+                                if [ $(wc -l <../errors) -lt 25 ]; then
+                                  cat ../errors
+                                else
+                                  head ../errors
+                                  echo ...
+                                  tail ../errors
+                                fi
+                              ) |
+                                while read err; do
+                                  echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler(1placeasm:${place_asm}) $implementationdir $compilerword $f $err" >&5
+                                done
+                            fi
+                          done
+
+                          [ "$ok" = 1 ] || continue
+                          if [ "$madeo" = 1 ]; then
+                            okar-$abi cr "lib$op.a" *.o || continue
+                            ranlib "lib$op.a" || :
+                          fi
 
                           if [ "$rust" ]; then
-                            timecop-build-rs "$op" "$lib/$abi" "$lib/timecop/$abi" >build.rs
+                            supercop-build-rs "$op" "$lib/$abi" "$lib/nontimecop/$abi" >build.rs
                             if killafter 300 \
                               env \
                               CC="$compilerbin" \
-                              CFLAGS="$compileropts $timecopincludes -DSUPERCOP -DCOMPILER=\"$compilerword\"" \
+                              CFLAGS="$compileropts $includes -DSUPERCOP -DCOMPILER=\"$compilerword\"" \
                               RUSTFLAGS='-C target_cpu=native' \
-                              cargo build -q --release --bin try-timecop >../errors 2>&1; then
-                              cp target/release/try-timecop try-timecop || ok=0
-                              strip try-timecop || :
+                              cargo build -q --release --bin try-small --bin try --bin measure >../errors 2>&1; then
+                              cp target/release/try-small try-small || ok=0
+                              cp target/release/try try || ok=0
+                              cp target/release/measure measure || ok=0
+                              strip try-small try measure || :
                             else
                               ok=0
                             fi
                             cat ../errors |
                               while read err; do
-                                echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler $implementationdir $compilerword try.$language $err" >&5
+                                echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler(2placeasm:${place_asm})  $implementationdir $compilerword try.$language $err" >&5
                               done
                             cargo clean -q || :
                           fi
                           [ "$ok" = 1 ] || continue
 
                           if [ ! "$rust" ]; then
+
+                            echo building trysmall $compiler -DSUPERCOP $includes -o try-small try-small.$language try-anything.$language "lib$op.a" $trylibs
                             killafter 300 \
                               $compiler -DSUPERCOP \
-                              $timecopincludes \
-                              -o try-timecop try-timecop.$language try-anything-timecop.$language \
-                              "lib$op.a" $timecoptrylibs >../errors 2>&1 || ok=0
+                              $includes \
+                              -o try-small try-small.$language try-anything.$language \
+                              "lib$op.a" $trylibs >../errors 2>&1 || ok=0
                             cat ../errors |
                               while read err; do
-                                echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler $implementationdir $compilerword try.$language $err" >&5
+                                echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler(3placeasm:${place_asm})  $implementationdir $compilerword try.$language $err" >&5
+                              done
+                          fi
+                          [ "$ok" = 1 ] || continue
+                          cp try-small /tmp/$opi-try-small
+
+                          if sh -c "killafter 3600 ./try-small $version $abi $implementationdir $compilerword"' || exit $?' >../outputs 2>../errors; then
+                            checksumsmall=$(awk '{print $1}' <../outputs)
+                            cycles=$(awk '{print $2}' <../outputs)
+                            checksumcycles=$(awk '{print $3}' <../outputs)
+                            cyclespersecond=$(awk '{print $4}' <../outputs)
+                            impl=$(awk '{print $5}' <../outputs)
+                          else
+                            echo "$version $shorthostname $abi $startdate $o $p/$security tryfails(4placeasm:${place_asm})  $implementationdir $compilerword error $?" >&5
+                            cat ../outputs ../errors |
+                              while read err; do
+                                echo "$version $shorthostname $abi $startdate $o $p/$security tryfails(5placeasm:${place_asm})  $implementationdir $compilerword $err" >&5
+                              done
+                            continue
+                          fi
+
+                          [ x"$expectedchecksumsmall" != x ] &&
+                            [ x"$expectedchecksumsmall" != "x$checksumsmall" ] &&
+                            echo "$version $shorthostname $abi $startdate $o $p/$security try(6placeasm:${place_asm}) $checksumsmall fails $cycles $checksumcycles $cyclespersecond $impl $compilerword" >&5 &&
+                            continue
+
+                          if [ ! "$rust" ]; then
+                            killafter 300 \
+                              $compiler -DSUPERCOP \
+                              $includes \
+                              -o try try.$language try-anything.$language \
+                              "lib$op.a" $trylibs >../errors 2>&1 || ok=0
+                            cat ../errors |
+                              while read err; do
+                                echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler(7placeasm:${place_asm})  $implementationdir $compilerword try.$language $err" >&5
                               done
                           fi
                           [ "$ok" = 1 ] || continue
 
-                          if sh -c "killafter 3600 valgrind -q --max-stackframe=16777216 --error-exitcode=99 --track-origins=yes ./try-timecop $version $abi $implementationdir $compilerword"' || exit $?' >../outputs 2>../errors; then
-                            echo "$version $shorthostname $abi $startdate $o $p/$security timecop_pass $implementationdir $compilerword $TIMECOP $?" >&5
-                            word=timecop_output
+                          if sh -c "killafter 3600 ./try $version $abi $implementationdir $compilerword"' || exit $?' >../outputs 2>../errors; then
+                            checksumbig=$(awk '{print $1}' <../outputs)
+                            cycles=$(awk '{print $2}' <../outputs)
+                            checksumcycles=$(awk '{print $3}' <../outputs)
+                            cyclespersecond=$(awk '{print $4}' <../outputs)
+                            impl=$(awk '{print $5}' <../outputs)
                           else
-                            exitcode=$?
-                            if [ "$exitcode" = "99" ] && grep -q "client request" ../outputs ../errors; then
-                              word=timecop_fail
-                            else
-                              word=timecop_error
-                            fi
-                            echo "$version $shorthostname $abi $startdate $o $p/$security $word $implementationdir $compilerword error $exitcode" >&5
+                            echo "$version $shorthostname $abi $startdate $o $p/$security tryfails(8placeasm:${place_asm})  $implementationdir $compilerword error $?" >&5
+                            cat ../outputs ../errors |
+                              while read err; do
+                                echo "$version $shorthostname $abi $startdate $o $p/$security tryfails(9placeasm:${place_asm})  $implementationdir $compilerword $err" >&5
+                              done
+                            continue
                           fi
 
-                          cat ../outputs ../errors |
-                            while read err; do
-                              echo "$version $shorthostname $abi $startdate $o $p/$security $word $implementationdir $compilerword $err" >&5
+                          [ x"$expectedchecksumbig" != x ] &&
+                            [ x"$expectedchecksumbig" != "x$checksumbig" ] &&
+                            echo "$version $shorthostname $abi $startdate $o $p/$security try(10placeasm:${place_asm}) $checksumbig fails $cycles $checksumcycles $cyclespersecond $impl $compilerword" >&5 &&
+                            continue
+
+                          checksumok=ok
+                          [ "x$expectedchecksumsmall" = "x" ] && checksumok=unknown
+                          [ "x$expectedchecksumbig" = "x" ] && checksumok=unknown
+                          echo "$version $shorthostname $abi $startdate $o $p/$security try(11placeasm:${place_asm}) $checksumsmall/$checksumbig $checksumok $cycles $checksumcycles $cyclespersecond $impl $compilerword" >&5
+
+                          compiledinfo "$version" "$shorthostname" "$abi" "$startdate" "$o" "$p/$security" "$implementationdir" "$compilerword" "$opi" "$language"
+
+                          if [ "$wanttimecop" ]; then
+                            ok=1
+
+                            if [ "$rust" ]; then
+                              timecop-build-rs "$op" "$lib/$abi" "$lib/timecop/$abi" >build.rs
+                              if killafter 300 \
+                                env \
+                                CC="$compilerbin" \
+                                CFLAGS="$compileropts $timecopincludes -DSUPERCOP -DCOMPILER=\"$compilerword\"" \
+                                RUSTFLAGS='-C target_cpu=native' \
+                                cargo build -q --release --bin try-timecop >../errors 2>&1; then
+                                cp target/release/try-timecop try-timecop || ok=0
+                                strip try-timecop || :
+                              else
+                                ok=0
+                              fi
+                              cat ../errors |
+                                while read err; do
+                                  echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler $implementationdir $compilerword try.$language $err" >&5
+                                done
+                              cargo clean -q || :
+                            fi
+                            [ "$ok" = 1 ] || continue
+
+                            if [ ! "$rust" ]; then
+                              killafter 300 \
+                                $compiler -DSUPERCOP \
+                                $timecopincludes \
+                                -o try-timecop try-timecop.$language try-anything-timecop.$language \
+                                "lib$op.a" $timecoptrylibs >../errors 2>&1 || ok=0
+                              cat ../errors |
+                                while read err; do
+                                  echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler $implementationdir $compilerword try.$language $err" >&5
+                                done
+                            fi
+                            [ "$ok" = 1 ] || continue
+
+                            if sh -c "killafter 3600 valgrind -q --max-stackframe=16777216 --error-exitcode=99 --track-origins=yes ./try-timecop $version $abi $implementationdir $compilerword"' || exit $?' >../outputs 2>../errors; then
+                              echo "$version $shorthostname $abi $startdate $o $p/$security timecop_pass $implementationdir $compilerword $TIMECOP $?" >&5
+                              word=timecop_output
+                            else
+                              exitcode=$?
+                              if [ "$exitcode" = "99" ] && grep -q "client request" ../outputs ../errors; then
+                                word=timecop_fail
+                              else
+                                word=timecop_error
+                              fi
+                              echo "$version $shorthostname $abi $startdate $o $p/$security $word $implementationdir $compilerword error $exitcode" >&5
+                            fi
+
+                            cat ../outputs ../errors |
+                              while read err; do
+                                echo "$version $shorthostname $abi $startdate $o $p/$security $word $implementationdir $compilerword $err" >&5
+                              done
+
+                          fi
+
+                          [ -s "../constbranchindex/bestc/median" ] && [ $(cat "../constbranchindex/bestc/median") -le $cycles ] && continue
+                          [ -s "../$security/bestc/median" ] && [ $(cat "../$security/bestc/median") -le $cycles ] && continue
+
+                          if [ ! "$rust" ]; then
+                            killafter 3600 \
+                              $compiler -D'COMPILER="'"$compiler"'"' \
+                              -DSUPERCOP -DLOOPS=3 \
+                              $includes \
+                              -o measure measure.$language measure-anything.$language \
+                              "lib$op.a" $measurelibs >../errors 2>&1 || ok=0
+                            cat ../errors |
+                              while read err; do
+                                echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler(12placeasm:${place_asm})  $implementationdir $compilerword measure.$language $err" >&5
+                              done
+                          fi
+                          [ "$ok" = 1 ] || continue
+
+                          for b in best bestc; do
+                            [ $language = cpp ] && [ $b = bestc ] && continue
+                            [ "$rust" ] && [ $b = bestc ] && continue
+                            [ -s "../constbranchindex/$b/median" ] && [ $(cat "../constbranchindex/$b/median") -le $cycles ] && continue
+                            [ -s "../$security/$b/median" ] && [ $(cat "../$security/$b/median") -le $cycles ] && continue
+                            echo "$cycles" >../"$security/$b/median"
+                            rm -f ../$security/$b/*.o ../$security/$b/measure || continue
+                            for f in *.o; do
+                              [ -f "$f" ] || continue
+                              cp -p "$f" "../$security/$b/${opi}-$f"
                             done
-
-                        fi
-
-                        [ -s "../constbranchindex/bestc/median" ] && [ $(cat "../constbranchindex/bestc/median") -le $cycles ] && continue
-                        [ -s "../$security/bestc/median" ] && [ $(cat "../$security/bestc/median") -le $cycles ] && continue
-
-                        if [ ! "$rust" ]; then
-                          killafter 3600 \
-                            $compiler -D'COMPILER="'"$compiler"'"' \
-                            -DSUPERCOP -DLOOPS=3 \
-                            $includes \
-                            -o measure measure.$language measure-anything.$language \
-                            "lib$op.a" $measurelibs >../errors 2>&1 || ok=0
-                          cat ../errors |
-                            while read err; do
-                              echo "$version $shorthostname $abi $startdate $o $p/$security fromcompiler $implementationdir $compilerword measure.$language $err" >&5
-                            done
-                        fi
-                        [ "$ok" = 1 ] || continue
-
-                        for b in best bestc; do
-                          [ $language = cpp ] && [ $b = bestc ] && continue
-                          [ "$rust" ] && [ $b = bestc ] && continue
-                          [ -s "../constbranchindex/$b/median" ] && [ $(cat "../constbranchindex/$b/median") -le $cycles ] && continue
-                          [ -s "../$security/$b/median" ] && [ $(cat "../$security/$b/median") -le $cycles ] && continue
-                          echo "$cycles" >../"$security/$b/median"
-                          rm -f ../$security/$b/*.o ../$security/$b/measure || continue
-                          for f in *.o; do
-                            [ -f "$f" ] || continue
-                            cp -p "$f" "../$security/$b/${opi}-$f"
+                            cp -p "${op}_publicinputs.h" "../$security/$b/${op}_publicinputs.h"
+                            cp -p "$op.h" "../$security/$b/$op.h"
+                            cp -p "$o.h" "../$security/$b/$o.h"
+                            cp -p measure ../$security/$b/measure
                           done
-                          cp -p "${op}_publicinputs.h" "../$security/$b/${op}_publicinputs.h"
-                          cp -p "$op.h" "../$security/$b/$op.h"
-                          cp -p "$o.h" "../$security/$b/$o.h"
-                          cp -p measure ../$security/$b/measure
                         done
-                      done
+                    done
                   )
-
                 done
 
               [ -f "$work/$security/best/measure" ] || continue
