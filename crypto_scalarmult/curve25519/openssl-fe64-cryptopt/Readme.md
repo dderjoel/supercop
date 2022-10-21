@@ -1,0 +1,4 @@
+- see ../openssl-fe64-ots
+- removed `void x25519_fe64_mul(fe64 h, const fe64 f, const fe64 g);` from `asm_ossl.h` and `asm_ossl.S`
+- and `asm_ossl.h` now `#define fe64_mul fiat_curve25519_solinas_mulmod`
+- added cryptopt.h declaring `fiat_curve25519_solinas_mulmod`
