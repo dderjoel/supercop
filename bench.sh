@@ -53,7 +53,7 @@ reset_supercop_bench_dir() {
   ./do-part crypto_rng
 
   # set +e
-  overwritelib
+  # overwritelib
 }
 eval_data() {
   grep -e '\(ok\|unknown\) ' "${datafile}" |
@@ -82,15 +82,15 @@ shorthostname=$(hostname | sed 's/\..*//' | tr -cd '[a-z][A-Z][0-9]' | tr '[A-Z]
 dir="./bench/${shorthostname}"
 datafile="./bench/${shorthostname}/data"
 [[ $1 =~ reset ]] && reset_supercop_bench_dir && exit 0
-[[ $1 =~ lib ]] && overwritelib && exit 0
+# [[ $1 =~ lib ]] && overwritelib && exit 0
 
 [[ $1 =~ eval ]] && eval_data && exit 0
 # for i in ${1}; do
 #   bench "${i}"
 # done
 
-# bench curve25519
-bench p256
+bench curve25519
+# bench p256
 # bench secp256k1
 exit 0
 # bench p384
