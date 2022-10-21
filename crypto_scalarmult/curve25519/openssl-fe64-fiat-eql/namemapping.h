@@ -8,7 +8,8 @@
 // used in the function
 #define fiat_curve25519_solinas_mulmod                                         \
   CRYPTO_NAMESPACE(fiat_curve25519_solinas_mulmod)
-#define x25519_fe64_sqr CRYPTO_NAMESPACE(x25519_fe64_sqr)
+#define fiat_curve25519_solinas_sqrmod                                         \
+  CRYPTO_NAMESPACE(fiat_curve25519_solinas_sqrmod)
 #define x25519_fe64_mul121666 CRYPTO_NAMESPACE(x25519_fe64_mul121666)
 #define x25519_fe64_add CRYPTO_NAMESPACE(x25519_fe64_add)
 #define x25519_fe64_sub CRYPTO_NAMESPACE(x25519_fe64_sub)

@@ -1,0 +1,2 @@
+- see ../openssl-fe64-cryptopt
+- using mul for squaring
