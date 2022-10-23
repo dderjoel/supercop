@@ -403,7 +403,7 @@ cat OPERATIONS |
                       cat "try-anything.c"
                       cat "measure-anything.c"
                       find "$implementationdir" -follow -type f |
-                        egrep '\.h$|\.c$|\.s$|\.S$|\.cc$|\.cpp$' |
+                        grep -E '\.h$|\.c$|\.s$|\.S$|\.cc$|\.cpp$' |
                         xargs cat
                     ) |
                       grep '#include' |
@@ -519,7 +519,7 @@ cat OPERATIONS |
                         echo ""
                         echo "#include \"${op}.h\""
                         echo ""
-                        egrep "${o}"'$|'"${o}"'\(|'"${o}"'_' <MACROS |
+                        grep -E "${o}"'$|'"${o}"'\(|'"${o}"'_' <MACROS |
                           sed "s/$o/$op/" | while read mop; do
                           echo "#define ${mop} ${mop}" | sed "s/$op/$o/"
                         done
@@ -539,13 +539,13 @@ cat OPERATIONS |
                           echo '#ifdef __cplusplus'
                           echo 'extern "C" {'
                           echo '#endif'
-                          egrep "${o}"'$|'"${o}"'\(|'"${o}"'_' <PROTOTYPES.c |
+                          grep -E "${o}"'$|'"${o}"'\(|'"${o}"'_' <PROTOTYPES.c |
                             sed "s/$o/$opi/"
                           echo '#ifdef __cplusplus'
                           echo '}'
                           echo '#endif'
                           echo ""
-                          egrep "${o}"'$|'"${o}"'\(|'"${o}"'_' <MACROS |
+                          grep -E "${o}"'$|'"${o}"'\(|'"${o}"'_' <MACROS |
                             sed "s/$o/$opi/" | while read mopi; do
                             echo "#define ${mopi} ${mopi}" | sed "s/$opi/$opp/"
                           done
