@@ -89,9 +89,10 @@ datafile="./bench/${shorthostname}/data"
 #   bench "${i}"
 # done
 
-bench curve25519
+# bench curve25519
 # bench p256
 # bench secp256k1
+bench everest
 exit 0
 # bench p384
 
