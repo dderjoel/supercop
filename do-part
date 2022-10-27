@@ -453,6 +453,12 @@ cat OPERATIONS |
                   cp -La "$implementationdir"/* "$work/compile"
 
                   cfiles=$(ls "$work/compile" | grep '\.c$' || :)
+                  # adding all local static libs
+                  trylibs="${trylibs} $(ls "$work/compile" | grep '\.a$' || :)"
+                  measurelibs="${measurelibs} $(ls "$work/compile" | grep '\.a$' || :)"
+                  timecoptrylibs="${timecoptrylibs} $(ls "$work/compile" | grep '\.a$' || :)"
+                  echo measurelibs: ${measurelibs} trylibs: ${trylibs} timecoptrylibs: ${timecoptrylibs}
+
                   ccfiles=$(ls "$work/compile" | grep '\.cc$' || :)
                   cppfiles=$(ls "$work/compile" | grep '\.cpp$' || :)
 
