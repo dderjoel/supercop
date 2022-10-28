@@ -40,6 +40,10 @@
 void fe64_mul(uint64_t *c, const uint64_t *a, uint64_t *b) {
   mul_EltFp25519_1w_x64(c, (uint64_t *)a, b);
 }
+void fe64_sqr(uint64_t *c, const uint64_t *a) {
+  sqr_256x256_integer_x64(buffer_1w, (uint64_t *)a);
+  red_EltFp25519_1w_x64(c, buffer_1w);
+}
 
 /**
  *
