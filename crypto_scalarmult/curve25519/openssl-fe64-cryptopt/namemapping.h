@@ -6,6 +6,7 @@
 #endif
 
 // used in the function
+
 #define fiat_curve25519_solinas_mulmod                                         \
   CRYPTO_NAMESPACE(fiat_curve25519_solinas_mulmod)
 #define x25519_fe64_sqr CRYPTO_NAMESPACE(x25519_fe64_sqr)
