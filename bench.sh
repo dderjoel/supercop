@@ -70,7 +70,7 @@ bench() {
 
   for s in ${1:-curve25519 p256}; do
     echo "doing work: crypto_scalarmult ${s} "
-    taskset 2 ./do-part crypto_scalarmult "${s}" >/dev/null
+    taskset 1 ./do-part crypto_scalarmult "${s}" >/dev/null
     cp "${datafile}" "${datafile}.${s}"
     eval_data
   done
