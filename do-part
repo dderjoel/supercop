@@ -512,7 +512,7 @@ cat OPERATIONS |
                   (
                     cd "$work/compile"
                     max=1
-                    # test -x "./do" # && max=3
+                    test -x "./do" && max=3
                     # for now check best mul|sq, check second best and third best
 
                     for place_asm in $(seq 1 $max); do
