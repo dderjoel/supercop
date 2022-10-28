@@ -97,13 +97,13 @@ void fe64_sqr(uint64_t *c, const uint64_t *a);
 }
 #endif
 
-// #define mul_EltFp25519_1w_x64(c, a, b)                                         \
-//   mul_256x256_integer_x64(buffer_1w, a, b);                                    \
-//   red_EltFp25519_1w_x64(c, buffer_1w);
+#define mul_EltFp25519_1w_x64(c, a, b)                                         \
+  mul_256x256_integer_x64(buffer_1w, a, b);                                    \
+  red_EltFp25519_1w_x64(c, buffer_1w);
 
-// #define sqr_EltFp25519_1w_x64(a)                                               \
-//   sqr_256x256_integer_x64(buffer_1w, a);                                       \
-//   red_EltFp25519_1w_x64(a, buffer_1w);
+#define sqr_EltFp25519_1w_x64(a)                                               \
+  sqr_256x256_integer_x64(buffer_1w, a);                                       \
+  red_EltFp25519_1w_x64(a, buffer_1w);
 
 #define mul_EltFp25519_2w_x64(c, a, b)                                         \
   mul2_256x256_integer_x64(buffer_2w, a, b);                                   \
