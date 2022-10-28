@@ -85,14 +85,16 @@ datafile="./bench/${shorthostname}/data"
 # [[ $1 =~ lib ]] && overwritelib && exit 0
 
 [[ $1 =~ eval ]] && eval_data && exit 0
-# for i in ${1}; do
-#   bench "${i}"
-# done
+
+todo=${1:-curve25519}
+for i in ${todo}; do
+  bench "${i}"
+done
 
 # bench curve25519
 # bench p256
 # bench secp256k1
-bench everest
+# bench everest
 exit 0
 # bench p384
 
