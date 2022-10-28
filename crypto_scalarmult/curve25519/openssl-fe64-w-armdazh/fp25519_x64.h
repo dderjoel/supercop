@@ -90,7 +90,7 @@ void mul_a24_EltFp25519_1w_x64(uint64_t *const c, uint64_t *const a);
 void inv_EltFp25519_1w_x64(uint64_t *const c, uint64_t *const a);
 
 void fred_EltFp25519_1w_x64(uint64_t *const c);
-static inline void fe64_mul(uint64_t *c, const uint64_t *a, uint64_t *b);
+void fe64_mul(uint64_t *c, const uint64_t *a, uint64_t *b);
 
 #ifdef __cplusplus
 }
