@@ -36,6 +36,11 @@
 
 #include "fp25519_x64.h"
 
+#include <stdint.h>
+static inline void fe64_mul(uint64_t *c, const uint64_t *a, uint64_t *b) {
+  mul_EltFp25519_1w_x64(c, (uint64_t *)a, b);
+}
+
 /**
  *
  * @param c Two 512-bit products: c0[0:7]=a0[0:3]*b0[0:3] and

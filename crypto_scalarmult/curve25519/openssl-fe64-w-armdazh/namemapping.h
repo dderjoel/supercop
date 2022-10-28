@@ -15,6 +15,12 @@
 #define x25519_fe64_sub CRYPTO_NAMESPACE(x25519_fe64_sub)
 #define x25519_fe64_tobytes CRYPTO_NAMESPACE(x25519_fe64_tobytes)
 
+#define fe64_sqr x25519_fe64_sqr
+#define fe64_mul121666 x25519_fe64_mul121666
+#define fe64_add x25519_fe64_add
+#define fe64_sub x25519_fe64_sub
+#define fe64_tobytes x25519_fe64_tobytes
+
 // to use the correct implementation
 #ifndef __BMI2__
 #define __BMI2__
