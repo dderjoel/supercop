@@ -16,7 +16,12 @@
 #define x25519_fe64_tobytes CRYPTO_NAMESPACE(x25519_fe64_tobytes)
 
 // to use the correct implementation
+#ifndef __BMI2__
 #define __BMI2__
+#endif
+
+#ifndef __ADX__
 #define __ADX__
+#endif
 
 #endif
