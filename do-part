@@ -454,9 +454,10 @@ cat OPERATIONS |
 
                   cfiles=$(ls "$work/compile" | grep '\.c$' || :)
                   # adding all local static libs
-                  trylibs="${trylibs} $(ls "$work/compile" | grep '\.a$' || :)"
-                  measurelibs="${measurelibs} $(ls "$work/compile" | grep '\.a$' || :)"
-                  timecoptrylibs="${timecoptrylibs} $(ls "$work/compile" | grep '\.a$' || :)"
+                  staticlibs=$(find "$implementationdir" -name '*.a' -exec realpath {} +)
+                  trylibs="${trylibs} ${staticlibs}"
+                  measurelibs="${measurelibs} ${staticlibs}"
+                  timecoptrylibs="${timecoptrylibs} ${staticlibs}"
                   echo measurelibs: ${measurelibs} trylibs: ${trylibs} timecoptrylibs: ${timecoptrylibs}
 
                   ccfiles=$(ls "$work/compile" | grep '\.cc$' || :)
