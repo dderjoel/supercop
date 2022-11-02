@@ -36,7 +36,7 @@ eval_data() {
 
 bench() {
   # check if we need to initialize
-  if ! test -d "${dir}/lib/amd64/" -o ! test -r "fastrandombytes.o"; then
+  if ! test -d "${dir}/lib/amd64/" -o ! -r "fastrandombytes.o"; then
     reset_supercop_bench_dir
   fi
 
