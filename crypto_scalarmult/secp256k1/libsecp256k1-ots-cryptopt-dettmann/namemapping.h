@@ -7,8 +7,6 @@
 
 #define CN_IIFY(s) CRYPTO_NAMESPACE(s)
 
-#define fiat_secp256k1_dettman_mul CRYPTO_NAMESPACE(fiat_secp256k1_dettman_mul)
-
 #define secp256k1_fe_mul_inner CRYPTO_NAMESPACE(fiat_secp256k1_dettman_mul)
 
 #define secp256k1_fe_sqr_inner CRYPTO_NAMESPACE(secp256k1_sqr_mul_inner)

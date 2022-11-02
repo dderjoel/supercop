@@ -17,6 +17,8 @@
 
 #include "namemapping.h"
 
+#include "dettman.h"
+
 SECP256K1_INLINE static void secp256k1_fe_sqr_inner(uint64_t *r,
                                                     const uint64_t *a) {
   /**
