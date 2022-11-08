@@ -1,7 +1,9 @@
 #include "asm_ossl.h"
 #include "crypto_scalarmult.h"
-#include "cryptopt.h"
 #include "namemapping.h"
+
+#include "asm_ossl.h"
+#include "cryptopt.h"
 #include <stdint.h>
 #include <string.h>
 

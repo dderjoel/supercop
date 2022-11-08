@@ -1,11 +1,9 @@
-#ifndef CRYPTOPT_H
-#define CRYPTOPT_H
-
-#include "namemapping.h"
+#ifndef CRYPTIOPT_H
+#define CRYPTIOPT_H
 #include <stdint.h>
 
-typedef uint64_t fe64[4];
-
-void fiat_curve25519_solinas_mulmod(fe64 h, const fe64 f, const fe64 g);
-
+#include "namemapping.h"
+void fiat_curve25519_solinas_mul(uint64_t out1[4], const uint64_t arg1[4],
+                                 const uint64_t arg2[4]);
+void fiat_curve25519_solinas_square(uint64_t out1[4], const uint64_t arg1[4]);
 #endif

@@ -6,8 +6,14 @@
 #endif
 
 // used in the function
-#define fiat_curve25519_solinas_mulmod                                         \
-  CRYPTO_NAMESPACE(fiat_curve25519_solinas_mulmod)
+#define fe64_mul fiat_curve25519_solinas_mul
+#define fe64_sqr fiat_curve25519_solinas_square
+
+#define fiat_curve25519_solinas_mul                                            \
+  CRYPTO_NAMESPACE(fiat_curve25519_solinas_mul)
+#define fiat_curve25519_solinas_square                                         \
+  CRYPTO_NAMESPACE(fiat_curve25519_solinas_square)
+
 #define x25519_fe64_sqr CRYPTO_NAMESPACE(x25519_fe64_sqr)
 #define x25519_fe64_mul121666 CRYPTO_NAMESPACE(x25519_fe64_mul121666)
 #define x25519_fe64_add CRYPTO_NAMESPACE(x25519_fe64_add)

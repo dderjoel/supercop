@@ -1,7 +1,8 @@
 #include "asm_ossl.h"
 #include "crypto_scalarmult.h"
-#include "cryptopt.h"
 #include "namemapping.h"
+
+#include "curve25519_solinas.h"
 #include <stdint.h>
 #include <string.h>
 
