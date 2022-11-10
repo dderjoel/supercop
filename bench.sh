@@ -40,7 +40,7 @@ bench() {
     reset_supercop_bench_dir
   fi
 
-  for s in ${1:-curve25519 p256}; do
+  for s in ${1}; do
     echo "doing work: crypto_scalarmult ${s} "
     taskset 1 ./do-part crypto_scalarmult "${s}" >/dev/null
     cp "${datafile}" "${datafile}.${s}"
@@ -51,7 +51,7 @@ bench() {
 
 [[ $1 =~ eval ]] && eval_data && exit 0
 
-todo=${1:-curve25519}
+todo=${1:-curve25519 secp256k1}
 for i in ${todo}; do
   bench "${i}"
 done
