@@ -5,6 +5,7 @@ test -e "${sfile}" && rm "${sfile}"
 count=${1:-1}
 
 base_path=~/cryptopt/results/fiat/
+base_path=~/cryptopt/results.wilson.20230113T141423/fiat/
 clean_file_name=".last_clean_run"
 
 # get best asms
