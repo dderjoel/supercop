@@ -10,7 +10,7 @@ clean_file_name=".last_clean_run"
 
 # get best asms
 for sym in fiat_curve25519_solinas_square fiat_curve25519_solinas_mul; do
-  p=${base_path}${sym}
+  p=${base_path}/${sym}
   test ! -d "${p}" && echo "couldn't find directory ${p}" && continue
 
   clean_file="${p}/${clean_file_name}"
