@@ -13,14 +13,14 @@ for sym in fiat_curve25519_carry_mul fiat_curve25519_carry_square; do
   test ! -d "${p}" && echo "couldn't find directory ${p}" && continue
 
   clean_file="${p}/${clean_file_name}"
-  test ! -e "${clean_file}" && echo "couldn't find ${clean_file}" && continue
+  test ! -f "${clean_file}" && echo "couldn't find ${clean_file}" && continue
 
   fast_asm_file=${p}/$(sort --general-numeric-sort "${clean_file}" |
     sed --regexp-extended --silent '/^[[:digit:]\.]+ [[:alnum:]_]+\.asm$/p' |
     sed --silent "${count}p" |
     awk '{print $2 }')
 
-  test ! -e "${fast_asm_file}" && echo "there is no fastest impl >>${p}<< for ${sym}" && continue
+  test ! -f "${fast_asm_file}" && echo "there is no fastest impl >>${p}<< for ${sym}" && continue
 
   ~/cryptopt/modules/scripts/convert/intel2att.sh --crypto-namespace "${fast_asm_file}" >>"${sfile}"
 done
