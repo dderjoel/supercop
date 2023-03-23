@@ -36,12 +36,12 @@ eval_data() {
 
 bench() {
   # check if we need to initialize
-  if ! test -d "${dir}/lib/amd64/" -o ! -r "fastrandombytes.o"; then
+  if ! test -d "${dir}/lib/amd64/" -o ! -r "${dir}/lib/amd64/fastrandombytes.o"; then
     reset_supercop_bench_dir
   fi
 
   for s in ${1}; do
-    echo "doing work: crypto_scalarmult ${s} "
+    echo "doing work: crypto_scalarmult ${s},  resultpath: >>${RESULTS_PATH}<<"
     taskset 1 ./do-part crypto_scalarmult "${s}" >/dev/null
     cp "${datafile}" "${datafile}.${s}"
     eval_data
