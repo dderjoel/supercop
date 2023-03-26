@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# create cryptopt-asms
+sfile="$(dirname "${0}")/asm.S"
+test -e "${sfile}" && rm "${sfile}"
+count=${1:-1}
+
+resdir=${RESULTS_PATH:-~/cryptopt/results}
+base_path=$(realpath "${resdir}/fiat/")
+clean_file_name=".last_clean_run"
+
+# get best asms
+for sym in fiat_curve25519_solinas_square fiat_curve25519_solinas_mul; do
+  p=${base_path}/${sym}
+  test ! -d "${p}" && echo "couldn't find directory ${p}" && continue
+
+  clean_file="${p}/${clean_file_name}"
+  test ! -f "${clean_file}" && echo "couldn't find ${clean_file}" && continue
+
+  fast_asm_file=${p}/$(sort --general-numeric-sort "${clean_file}" |
+    sed --regexp-extended --silent '/^[[:digit:]\.]+ [[:alnum:]_]+\.asm$/p' |
+    sed --silent "${count}p" |
+    awk '{print $2 }')
+
+  test ! -f "${fast_asm_file}" && echo "there is no fastest impl >>${p}<< for ${sym}" && continue
+
+  ~/cryptopt/modules/scripts/convert/intel2att.sh --crypto-namespace "${fast_asm_file}" >>"${sfile}"
+done
