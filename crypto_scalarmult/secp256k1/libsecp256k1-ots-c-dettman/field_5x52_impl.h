@@ -9,13 +9,13 @@
 
 #include "libsecp256k1-config.h"
 
+#include "dettman.h"
 #include "field.h"
 #include "modinv64_impl.h"
 #include "namemapping.h"
 #include "util.h"
 
 // #if defined(USE_ASM_X86_64)
-#include "field_5x52_asm_impl.h"
 // #include "field_5x52_int128_impl.h"
 
 /** Implements arithmetic modulo FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF
