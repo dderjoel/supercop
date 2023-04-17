@@ -8,13 +8,12 @@
 #define SECP256K1_FIELD_REPR_IMPL_H
 
 #include "libsecp256k1-config.h"
+#include "namemapping.h"
 
 #include "field.h"
+#include "field_5x52_asm_impl.h"
 #include "modinv64_impl.h"
-#include "namemapping.h"
 #include "util.h"
-
-#include "dettman.h"
 
 /** Implements arithmetic modulo FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF
  * FFFFFFFF FFFFFFFE FFFFFC2F, represented as 5 uint64_t's in base 2^52, least
