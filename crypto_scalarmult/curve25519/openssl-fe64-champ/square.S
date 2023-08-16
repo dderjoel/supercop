@@ -1,104 +1,103 @@
 .text
 .global CRYPTO_NAMESPACE(fiat_curve25519_solinas_square)
 CRYPTO_NAMESPACE(fiat_curve25519_solinas_square):
-	mov    (%rsi),%rdx
-	mulx   0x8(%rsi),%rax,%r10
-	xor    %r11,%r11
-	adox   %rax,%rax
-	mov    (%rsi),%rdx
-	mulx   0x10(%rsi),%rcx,%r8
-	mov    0x18(%rsi),%rdx
-	mulx   0x10(%rsi),%r9,%r11
-	adcx   %r10,%rcx
-	adox   %rcx,%rcx
-	mov    (%rsi),%rdx
-	mov    %rbx,-0x80(%rsp)
-	mulx   0x18(%rsi),%r10,%rbx
-	adcx   %r8,%r10
-	mov    0x18(%rsi),%rdx
-	mov    %rbp,-0x78(%rsp)
-	mulx   0x8(%rsi),%r8,%rbp
-	adcx   %rbx,%r8
 	mov    0x8(%rsi),%rdx
-	mov    %r12,-0x70(%rsp)
-	mulx   0x10(%rsi),%rbx,%r12
-	adcx   %rbp,%r9
-	mov    $0x0,%edx
-	adcx   %rdx,%r11
-	clc    
-	adcx   %r10,%rbx
-	adox   %rbx,%rbx
-	adcx   %r8,%r12
-	mov    %rdx,%r10
-	adcx   %r9,%r10
-	mov    %rdx,%rbp
-	adcx   %r11,%rbp
-	adox   %r12,%r12
+	mulx   (%rsi),%rax,%r10
 	mov    0x8(%rsi),%rdx
+	mulx   %rdx,%r11,%rcx
+	mov    (%rsi),%rdx
 	mulx   %rdx,%r8,%r9
-	mov    (%rsi),%rdx
-	mov    %r13,-0x68(%rsp)
-	mulx   %rdx,%r11,%r13
-	setb   %dl
-	clc    
-	adcx   %rax,%r13
-	adcx   %rcx,%r8
-	adcx   %rbx,%r9
-	adox   %r10,%r10
-	adox   %rbp,%rbp
-	movzbq %dl,%rax
-	mov    $0x0,%ecx
-	adox   %rcx,%rax
-	mov    %dl,%bl
 	mov    0x10(%rsi),%rdx
-	mov    %r14,-0x60(%rsp)
-	mulx   %rdx,%rcx,%r14
-	adcx   %r12,%rcx
-	adcx   %r10,%r14
+	mov    %rbx,-0x80(%rsp)
+	mov    %rbp,-0x78(%rsp)
+	mulx   0x8(%rsi),%rbx,%rbp
+	mov    (%rsi),%rdx
+	mov    %r12,-0x70(%rsp)
+	mov    %r13,-0x68(%rsp)
+	mulx   0x10(%rsi),%r12,%r13
+	xor    %rdx,%rdx
+	adox   %rax,%rax
 	mov    0x18(%rsi),%rdx
-	mulx   %rdx,%r12,%r10
-	mov    $0x26,%edx
+	mov    %r14,-0x60(%rsp)
 	mov    %r15,-0x58(%rsp)
+	mulx   (%rsi),%r14,%r15
+	adcx   %r10,%r12
+	adcx   %r13,%r14
+	mov    0x8(%rsi),%rdx
+	mulx   0x18(%rsi),%r10,%r13
+	mov    0x10(%rsi),%rdx
 	mov    %rdi,-0x50(%rsp)
-	mulx   %r14,%r15,%rdi
-	adcx   %rbp,%r12
-	movzbq %bl,%rbp
-	lea    0x0(%rbp,%rax,1),%rbp
-	adcx   %r10,%rbp
-	mulx   %rbp,%rbx,%rax
-	xor    %r14,%r14
-	adox   %r13,%r15
-	mulx   %rcx,%r13,%r10
-	adcx   %r11,%r13
-	mulx   %r12,%r11,%rcx
-	adox   %r8,%r11
+	mov    %r8,-0x48(%rsp)
+	mulx   0x18(%rsi),%rdi,%r8
 	adcx   %r15,%r10
-	adox   %r9,%rbx
-	adox   %r14,%rax
-	adcx   %r11,%rdi
+	adcx   %r13,%rdi
+	mov    $0x0,%edx
+	adcx   %rdx,%r8
+	clc
+	adcx   %r14,%rbx
+	adcx   %r10,%rbp
+	adox   %r12,%r12
+	mov    %rdx,%r15
+	adcx   %rdi,%r15
+	adox   %rbx,%rbx
+	mov    %rdx,%r14
+	adcx   %r8,%r14
+	setb   %r13b
+	clc
+	adcx   %rax,%r9
+	adcx   %r12,%r11
+	adox   %rbp,%rbp
 	adcx   %rbx,%rcx
-	adc    $0x0,%rax
-	mulx   %rax,%r8,%r9
-	xor    %r9,%r9
-	adox   %r13,%r8
-	mov    %r9,%r14
-	adox   %r10,%r14
-	mov    %r9,%r12
-	adox   %rdi,%r12
-	mov    %r9,%rbp
-	adox   %rcx,%rbp
-	mov    -0x50(%rsp),%r15
-	mov    %r12,0x10(%r15)
-	mov    %rbp,0x18(%r15)
-	mov    %r9,%r13
-	cmovo  %rdx,%r13
-	adcx   %r13,%r8
-	mov    %r14,0x8(%r15)
-	mov    %r8,(%r15)
+	adox   %r15,%r15
+	adox   %r14,%r14
+	movzbq %r13b,%rax
+	adox   %rdx,%rax
+	mov    0x10(%rsi),%rdx
+	mulx   %rdx,%r10,%rdi
+	adcx   %rbp,%r10
+	adcx   %r15,%rdi
+	mov    0x18(%rsi),%rdx
+	mulx   %rdx,%r8,%r12
+	adcx   %r14,%r8
+	mov    $0x26,%edx
+	mulx   %r8,%rbx,%rbp
+	movzbq %r13b,%r15
+	lea    (%r15,%rax,1),%r15
+	adcx   %r12,%r15
+	mulx   %r15,%r13,%r14
+	mulx   %rdi,%rax,%r12
+	xor    %rdi,%rdi
+	adox   %r9,%rax
+	adox   %r11,%rbx
+	adox   %rcx,%r13
+	mulx   %r10,%r9,%r11
+	adox   %rdi,%r14
+	adcx   -0x48(%rsp),%r9
+	adcx   %rax,%r11
+	adcx   %rbx,%r12
+	adcx   %r13,%rbp
+	adc    $0x0,%r14
+	mulx   %r14,%rcx,%r10
+	xor    %r10,%r10
+	adox   %r9,%rcx
+	mov    %r10,%rdi
+	adox   %r11,%rdi
+	mov    %r10,%r8
+	adox   %r12,%r8
+	mov    %r10,%r15
+	adox   %rbp,%r15
+	mov    %r10,%rax
+	cmovo  %rdx,%rax
+	adcx   %rax,%rcx
+	mov    -0x50(%rsp),%rbx
+	mov    %rcx,(%rbx)
+	mov    %r8,0x10(%rbx)
+	mov    %rdi,0x8(%rbx)
+	mov    %r15,0x18(%rbx)
 	mov    -0x80(%rsp),%rbx
 	mov    -0x78(%rsp),%rbp
 	mov    -0x70(%rsp),%r12
 	mov    -0x68(%rsp),%r13
 	mov    -0x60(%rsp),%r14
 	mov    -0x58(%rsp),%r15
-	ret    
+	ret
