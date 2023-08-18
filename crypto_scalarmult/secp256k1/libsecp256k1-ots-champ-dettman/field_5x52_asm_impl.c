@@ -330,7 +330,7 @@ void secp256k1_fe_sqr_inner(uint64_t *r, const uint64_t *a) {
                "lea    (%%rdx,%%rbx,1),%%rdx\n"
                "mov    %%rdx,0x20(%%rdi)\n"
                "mov    %%r13,0x18(%%rdi)\n"
-               : "+D"(r),
+               : "+D"(r)
                : "D"(r), "S"(a)
                : "rax", "rbx", "rcx", "rdx", "r8", "r9", "r10", "r11", "r12",
                  "rbp", "r13", "r14", "r15", "cc", "memory");
