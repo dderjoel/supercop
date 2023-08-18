@@ -30,7 +30,7 @@ eval_data() {
     sed -re 's/^.*(ok|unknown) ([[:digit:]]+)( [[:digit:]]+){2} ([[:graph:]_]+\/){2}/\2 /' -e 's/(-O.).*$/\1/' -e 's@/mnt/pil/clang13/bin/clang@clang13@g' |
     sort -g |
     awk '{print $2 " (" $3 ") " $1}' |
-    xargs printf '%20s %40s %20s\n' |
+    xargs printf '%50s %40s %20s\n' |
     sed -e 's/_/ /g' -e "s/\\(.*\\).../\\1k cycles/"
 }
 
