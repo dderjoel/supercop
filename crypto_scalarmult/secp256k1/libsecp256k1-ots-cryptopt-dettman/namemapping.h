@@ -9,6 +9,6 @@
 
 #define secp256k1_fe_mul_inner CRYPTO_NAMESPACE(fiat_secp256k1_dettman_mul)
 
-#define secp256k1_fe_sqr_inner CRYPTO_NAMESPACE(secp256k1_sqr_mul_inner)
+#define secp256k1_fe_sqr_inner CRYPTO_NAMESPACE(fiat_secp256k1_dettman_square)
 
 #endif

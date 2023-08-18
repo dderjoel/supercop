@@ -14,10 +14,6 @@
 #include "namemapping.h"
 #include "util.h"
 
-// #if defined(USE_ASM_X86_64)
-#include "field_5x52_asm_impl.h"
-// #include "field_5x52_int128_impl.h"
-
 /** Implements arithmetic modulo FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF
  * FFFFFFFF FFFFFFFE FFFFFC2F, represented as 5 uint64_t's in base 2^52, least
  * significant first. Note that the limbs are allowed to contain >52 bits each.
