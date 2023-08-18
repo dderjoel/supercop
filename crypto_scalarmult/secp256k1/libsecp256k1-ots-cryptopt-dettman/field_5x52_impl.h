@@ -14,6 +14,12 @@
 #include "namemapping.h"
 #include "util.h"
 
+void CRYPTO_NAMESPACE(fiat_secp256k1_dettman_square)(uint64_t out1[5],
+                                                     const uint64_t arg1[5]);
+void CRYPTO_NAMESPACE(fiat_secp256k1_dettman_mul)(uint64_t out1[5],
+                                                  const uint64_t arg1[5],
+                                                  const uint64_t arg2[5]);
+
 /** Implements arithmetic modulo FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF
  * FFFFFFFF FFFFFFFE FFFFFC2F, represented as 5 uint64_t's in base 2^52, least
  * significant first. Note that the limbs are allowed to contain >52 bits each.
